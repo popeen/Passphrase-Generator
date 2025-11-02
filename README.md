@@ -1,4 +1,4 @@
-[![issues-shield]](issues)
+[![issues-shield]](https://github.com/popeen/Passphrase-Generator/issues)
 [![license-shield]](LICENSE.md)
 [![Buy me a coffee][buymeacoffee-shield]][buymeacoffee-link]
 

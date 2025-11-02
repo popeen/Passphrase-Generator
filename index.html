@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <title>Passphrase Generator</title>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+        <style>
+            :root{
+                --primary:#16a34a;
+                --primary-dark:#15803d;
+                --bg-gradient:linear-gradient(135deg,#0f172a,#1e293b);
+                --glass-bg:rgba(20,20,20,0.6);
+                --border-color:rgba(255,255,255,0.12);
+                --input-bg:rgba(30,30,30,0.8);
+                --input-color:#fff;
+                --text-color:#e5e7eb;
+                --text-muted:rgba(229,231,235,0.8);
+            }
+    
+            *{
+                box-sizing:border-box
+            }
+
+            body{
+                margin:0;
+                font-family:"Inter",sans-serif;
+                min-height:100vh;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                padding:20px;
+                background:var(--bg-gradient);
+                color:var(--text-color);
+            }
+    
+            .wrap{
+                width:100%;
+                max-width:520px;
+            }
+
+            h1{
+                font-size:1.9rem;
+                text-align:center;
+                margin:0 0 16px 0;
+                font-weight:700;
+            }
+    
+            .card{
+                background:var(--glass-bg);
+                border-radius:14px;
+                padding:22px;
+                border:1px solid var(--border-color);
+                backdrop-filter:blur(12px);
+                box-shadow:0 10px 30px rgba(0,0,0,0.25);
+            }
+    
+            .row{
+                display:flex;
+                gap:12px
+            }
+
+            .form-group{
+                margin-bottom:12px;
+                display:flex;
+                flex-direction:column;
+                gap:6px
+            }
+
+            label{
+                font-weight:600;
+                font-size:0.95rem;
+                color:var(--text-color);
+            }
+        
+            input[type="number"], input[type="text"], select{
+                padding:10px;
+                border-radius:8px;
+                border:none;
+                font-size:1rem;
+                background:var(--input-bg);
+                color:var(--input-color);
+                outline:none;
+            }
+            input[type="range"] {
+                -webkit-appearance: none;
+                width: 100%;
+                height: 12px;
+                border-radius: 6px;
+                outline: none;
+            }
+
+            input[type="range"]::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                width: 24px;
+                height: 24px;
+                background: var(--primary);
+                border-radius: 50%;
+                border: none;
+                cursor: pointer;            
+            }
+
+            input[type="range"]::-moz-range-thumb {
+                width: 24px;
+                height: 24px;
+                background: var(--primary);
+                border-radius: 50%;
+                border: none;
+                cursor: pointer;
+            }
+
+            input[type="range"]::-moz-range-track {
+                height: 12px;
+                border-radius: 6px;
+                background: rgba(255,255,255,0.1);
+            }
+
+            input[type="range"]::-moz-range-progress {
+                background: var(--primary);
+                height: 12px;
+                border-radius: 6px;
+            }
+
+            input[type="checkbox"]{
+                width:18px;
+                height:18px;
+                accent-color:var(--primary);
+            }
+            
+            .checkbox-group{
+                display:flex;
+                flex-direction:column;
+                gap:8px;
+                margin-bottom:12px
+            }
+    
+            button{
+                background:var(--primary);
+                border:none;
+                color:#fff;
+                padding:12px;
+                border-radius:10px;
+                font-weight:700;
+                cursor:pointer;
+                transition:transform .08s ease,background .18s;
+            }
+
+            button:hover{
+                transform:translateY(-2px);
+                background:var(--primary-dark);
+            }
+
+            button:disabled{
+                opacity:0.6;
+                cursor:not-allowed;
+                transform:none;
+            }
+    
+            #output{
+                margin-top:14px;
+                background:rgba(255,255,255,0.08);
+                padding:12px;
+                border-radius:8px;
+                font-family:"Courier New",monospace;
+                word-break:break-word;
+                font-size:1.12rem;
+                text-align:center;
+                color:var(--text-color);
+            }
+    
+            #copyButton{
+                margin-top:10px;
+                background:rgba(255,255,255,0.12);
+                border:1px solid var(--border-color);
+                color:#fff;
+                padding:8px 12px;
+                border-radius:8px;
+            }
+
+            .status{
+                font-size:0.95rem;
+                margin-top:8px;
+                color:var(--text-muted);
+            }
+
+            .error{
+                color:#ffe6e6;
+                background:rgba(50,0,0,0.3);
+                padding:8px;
+                border-radius:6px;
+                margin-top:8px;
+            }
+    
+            @media (max-width:520px){
+                .row{
+                    flex-direction:column
+                }
+            }
+        
+            #checkPwnedBtn{
+                background:transparent;
+                border:1px solid rgba(255,255,255,0.18);
+                color:#fff;
+                padding:8px 12px;
+                border-radius:8px;
+                cursor:pointer;
+                font-weight:700;
+            }
+
+            #checkPwnedBtn:disabled{
+                opacity:0.6;
+                cursor:not-allowed
+            }
+
+            #pwnedStatus{
+                font-size:0.95rem;
+                color:var(--text-color) !important;
+            }
+
+            #pwnedStatus.warn{
+                color:#ffd166 !important;
+            }
+
+            #pwnedStatus.bad{
+                color:#ff6b6b !important;
+            }
+
+        </style>
+    
+    </head>
+    <body>
+        <div class="wrap">
+
+            <h1>🔐 Passphrase Generator</h1>
+
+            <div style="text-align: center;">
+                <p>
+                    <a href="https://xkcd.com/936/" target="_blank" style="font-style: italic; color:#3d5f96; text-decoration:none;">Correct Horse Battery Staple</a>
+                </p>
+            </div>
+
+            <div class="card">
+
+                <p style="font-size:0.95rem; margin-bottom:16px; color:rgba(255,255,255,0.9); line-height:1.3;">
+                    Your passphrase is generated entirely in your browser, the server never sees it.
+                </p>
+
+                <p style="font-size:0.95rem; margin-bottom:16px; color:rgba(255,255,255,0.9); line-height:1.3;">
+                    You can also check if your passphrase appears in known data breaches via 
+                    <strong>Have I Been Pwned</strong>. For your privacy, the full passphrase is <em>never</em> sent; 
+                    only the first 5 characters of its SHA‑1 hash are sent (<a href="https://blog.cloudflare.com/validating-leaked-passwords-with-k-anonymity/" target="_blank" style="color:#fff;">k‑anonymity</a>).
+                </p>
+
+                <div id="status" class="status">Loading word list…</div>
+                <div id="errorBox" class="error" style="display:none"></div>
+
+                <div id="formContainer" style="display:none; margin-top:12px">
+
+                    <div class="form-group">
+                        <label for="wordlistSelect">Language</label>
+                        <select id="wordlistSelect">
+                        <option value="mixed" selected>Mixed</option>
+                        <option value="english">English</option>
+                        <option value="swedish">Swedish</option>
+                        <option value="german">German</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="numWords">Number of words: <span id="numWordsValue">4</span></label>
+                        <input id="numWords" type="range" min="3" max="20" value="4" oninput="updateSlider()">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="separator">Separator</label>
+                        <input id="separator" type="text" value="-">
+                    </div>
+
+                    <div class="checkbox-group">
+                        <label style="font-weight:700;margin-bottom:6px">Options</label>
+                        <label class="checkbox-item"><input type="checkbox" id="capitalize" checked="checked"> <span style="margin-left:6px">Capitalize words</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="includeNumbers"> <span style="margin-left:6px">Include numbers</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="includeSpecialChars"> <span style="margin-left:6px">Include special characters</span></label>
+                    </div>
+
+                    <button id="generateBtn" onclick="generatePassphrase()">Generate Passphrase</button>
+                    <div id="output" aria-live="polite"></div>
+
+                    <button id="copyButton" onclick="copyToClipboard()" style="display:none">Copy</button>
+                    <button id="checkPwnedBtn" onclick="checkPwned()" style="display:none;margin-left:8px">Check HIBP</button>
+                    <div id="pwnedStatus" class="status" style="display:none;margin-top:8px"></div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            const specialChars = "!@#$%^&*()_+[]{}|;:,.<>?";
+            let englishList = [];
+            let swedishList = [];
+            let germanList = [];
+            let wordList = [];
+
+            const statusEl = document.getElementById('status');
+            const errorBox = document.getElementById('errorBox');
+            const formContainer = document.getElementById('formContainer');
+            const outputEl = document.getElementById('output');
+            const copyButton = document.getElementById('copyButton');
+            const checkPwnedBtn = document.getElementById('checkPwnedBtn');
+            const pwnedStatus = document.getElementById('pwnedStatus');
+            const wordlistSelect = document.getElementById('wordlistSelect');
+
+            function getRandomInt(max){
+                const array = new Uint32Array(1);
+                crypto.getRandomValues(array);
+                return array[0] % max;
+            }
+
+            function randomChance(percent){
+                return getRandomInt(100) < percent;
+            }
+
+            async function fetchList(url){
+                const resp = await fetch(url, { cache: 'no-store' });
+                if (!resp.ok) throw new Error(`${resp.status} ${resp.statusText}`);
+                const text = await resp.text();
+                return text.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+            }
+
+            async function loadWordList(){
+                const selectedFile = wordlistSelect.value;
+                statusEl.style.display = 'block';
+                statusEl.textContent = 'Loading word list…';
+                errorBox.style.display = 'none';
+                formContainer.style.display = 'none';
+
+                try {
+                    if(selectedFile === 'mixed'){
+                        if(englishList.length === 0) englishList = await fetchList('/english.txt');
+                        if(swedishList.length === 0) swedishList = await fetchList('/swedish.txt');
+                        if(germanList.length === 0) germanList = await fetchList('/german.txt');
+                        wordList = [...englishList, ...swedishList, ...germanList];
+                    } else if(selectedFile === 'english'){
+                        if(englishList.length === 0) englishList = await fetchList('/english.txt');
+                        wordList = englishList;
+                    } else if(selectedFile === 'swedish'){
+                        if(swedishList.length === 0) swedishList = await fetchList('/swedish.txt');
+                        wordList = swedishList;
+                    } else if(selectedFile === 'german'){
+                        if(germanList.length === 0) germanList = await fetchList('/german.txt');
+                        wordList = germanList;
+                    }
+
+                    if(wordList.length === 0) throw new Error('Wordlist empty');
+                    statusEl.style.display = 'none';
+                    formContainer.style.display = 'block';
+                } catch(err){
+                    statusEl.style.display = 'none';
+                    errorBox.style.display = 'block';
+                    errorBox.textContent = 'Failed to load wordlist: ' + String(err);
+                    console.warn('Wordlist load failed:', err);
+                }
+            }
+
+            loadWordList();
+            wordlistSelect.addEventListener('change', loadWordList);
+
+            function generatePassphrase(){
+                const numWords = parseInt(document.getElementById('numWords').value,10) || 4;
+                const separator = document.getElementById('separator').value || '-';
+                const capitalize = document.getElementById('capitalize').checked;
+                const includeNumbers = document.getElementById('includeNumbers').checked;
+                const includeSpecialChars = document.getElementById('includeSpecialChars').checked;
+
+                if(!wordList || wordList.length === 0){
+                    outputEl.textContent = 'Wordlist not available.';
+                    return;
+                }
+
+                let pass = [], numberUsed=false, specialUsed=false;
+                for(let i=0;i<numWords;i++){
+                    let w = wordList[getRandomInt(wordList.length)];
+                    if(capitalize) w = w.charAt(0).toUpperCase() + w.slice(1);
+                    if(includeNumbers && randomChance(30)){ w += getRandomInt(100); numberUsed = true; }
+                    if(includeSpecialChars && randomChance(30)){ w += specialChars[getRandomInt(specialChars.length)]; specialUsed = true; }
+                    pass.push(w);
+                }
+
+                if(includeNumbers && !numberUsed) pass[getRandomInt(pass.length)] += getRandomInt(100);
+                if(includeSpecialChars && !specialUsed) pass[getRandomInt(pass.length)] += specialChars[getRandomInt(specialChars.length)];
+
+                outputEl.textContent = pass.join(separator);
+                copyButton.style.display = 'inline-block';
+                checkPwnedBtn.style.display = 'inline-block';
+                copyButton.textContent = 'Copy';
+                pwnedStatus.style.display = 'none';
+            }
+
+            function copyToClipboard(){
+                const text = outputEl.textContent || '';
+                if(!text) return;
+                navigator.clipboard.writeText(text).then(()=>{
+                    copyButton.textContent='✅ Copied!';
+                    setTimeout(()=>copyButton.textContent='Copy',1400);
+                },()=>{ copyButton.textContent='Copy'; });
+            }
+
+            async function sha1Hex(str){
+                const data = new TextEncoder().encode(str);
+                const hashBuffer = await crypto.subtle.digest('SHA-1', data);
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                return hashArray.map(b => b.toString(16).padStart(2,'0')).join('').toUpperCase();
+            }
+
+            async function checkPwned(){
+                const pass = (outputEl.textContent || '').trim();
+                if(!pass){
+                    pwnedStatus.style.display='block';
+                    pwnedStatus.className='status warn';
+                    pwnedStatus.textContent='No passphrase to check.';
+                    return;
+                }
+
+                checkPwnedBtn.disabled = true;
+                checkPwnedBtn.textContent='Checking…';
+                pwnedStatus.style.display='block';
+                pwnedStatus.className='status';
+                pwnedStatus.textContent='Checking...';
+
+                try{
+                    const hash = await sha1Hex(pass);
+                    const prefix = hash.slice(0,5);
+                    const suffix = hash.slice(5);
+                    const url = `https://api.pwnedpasswords.com/range/${prefix}`;
+                    const resp = await fetch(url, {cache:'no-store'});
+
+                    if(!resp.ok) throw new Error(`Pwned API error: ${resp.status}`);
+
+                    const body = await resp.text();
+                    const lines = body.split('\n').map(l=>l.trim()).filter(Boolean);
+                    let foundCount = 0;
+
+                    for(const line of lines){
+                        const [suf,cnt] = line.split(':');
+                        if(!suf) continue;
+                        if(suf.toUpperCase() === suffix.toUpperCase()){
+                            foundCount = parseInt(cnt.replace(/\r/,'')||'0',10);
+                            break;
+                        }
+                    }
+
+                    if(foundCount>0){
+                        pwnedStatus.className='status bad';
+                        pwnedStatus.textContent=`⚠️ This passphrase has been found ${foundCount} times in data leaks. Do not use it!`;
+                    } else {
+                        pwnedStatus.className='status good';
+                        pwnedStatus.textContent='✅ Phrase not found in any leak known to Have I Been Pwned.';
+                    }
+
+                } catch(err){
+                    console.error('Pwned check failed:',err);
+                    pwnedStatus.className='status warn';
+                    pwnedStatus.textContent='Failed to check with HIBP: ' + String(err);
+                } finally{
+                    checkPwnedBtn.disabled=false;
+                    checkPwnedBtn.textContent='Check HIBP';
+                }
+            }
+        
+
+            const slider = document.getElementById('numWords');
+            const numWordsValue = document.getElementById('numWordsValue');
+
+            function updateSlider() {
+                const value = parseInt(slider.value, 10);
+                numWordsValue.textContent = value;
+
+                const min = parseInt(slider.min, 10);
+                const max = parseInt(slider.max, 10);
+                const percent = ((value - min) / (max - min)) * 100;
+
+                slider.style.background = `linear-gradient(to right, var(--primary) 0%, var(--primary) ${percent}%, rgba(255,255,255,0.1) ${percent}%, rgba(255,255,255,0.1) 100%)`;
+            }
+
+            window.addEventListener('DOMContentLoaded', updateSlider);
+            slider.addEventListener('input', updateSlider);
+
+        </script>
+    </body>
+</html>

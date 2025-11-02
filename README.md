@@ -4,8 +4,6 @@
 
 # 🔐 Passphrase Generator
 
-![License: MIT](https://img.shields.io/badge/License-MIT-green) ![GitHub Pages](https://img.shields.io/badge/Live-Demo-blue)
-
 A **secure, browser-based passphrase generator**. Everything happens locally, your passphrase never leaves your browser.
 
 ---
